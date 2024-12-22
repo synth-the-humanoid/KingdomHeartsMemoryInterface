@@ -5,83 +5,52 @@ using KingdomHeartsMemoryInterface.Types;
 MemoryInterface.MemoryInterface memoryInterface = new MemoryInterface.MemoryInterface("KINGDOM HEARTS FINAL MIX");
 OffsetHandler.LoadFile("./offsets.csv");
 
-Script[] loadedScripts = Script.GetScriptArray(memoryInterface);
+Script selectedScript = null;
+int selectionIndex = 0;
 string userInput = "";
-bool doAutoloop = false;
-int index = 0;
-Entity currentEntity = null;
-Script current = null;
-
-while (userInput != "exit")
+do
 {
-    if(doAutoloop)
+    Script[] loadedScripts = Script.GetScriptArray(memoryInterface);
+    Console.WriteLine("Script Count: {0:D}", loadedScripts.Length);
+    userInput = Console.ReadLine();
+    if(!int.TryParse(userInput, out selectionIndex) && selectedScript != null)
     {
-        Thread.Sleep(1000);
-        if(Console.KeyAvailable)
+        string[] fields = userInput.Split(" ");
+        switch(fields[0])
         {
-            doAutoloop = false;
-            continue;
-        }
-    }
-    else
-    {
-        Console.WriteLine("Scripts: {0:D}", loadedScripts.Length);
-        userInput = Console.ReadLine();
-    }
-    if(doAutoloop || userInput == "" || int.TryParse(userInput, out index))
-    {
-        current = loadedScripts[index];
-        string entityName = "None";
-        if (current.Entity.EntityPtr != 0)
-        {
-            if(currentEntity != null)
-            {
-                currentEntity.Green = 1f;
-                currentEntity.Blue = 1f;
-            }
-            currentEntity = current.Entity;
-            entityName = currentEntity.Actor.Name;
-            currentEntity.Green = 0f;
-            currentEntity.Blue = 0f;
-        }
-        ScriptInstruction currentInstruction = current.GetInstruction(current.CurrentInstruction);
-        string data = string.Format("Script ID: {0:D}\nScript ID Code: {1:X}\nEntity: {2}\nCurrent Instruction: {3:X}\nCurrent Function: {4:X}\nCurrent Parameter: {5:X}", index, current.ScriptIDCode, entityName, current.CurrentInstruction, currentInstruction.FunctionID, currentInstruction.Parameter);
-        Console.WriteLine(data);
-    }
-    else
-    {
-        if(userInput != "exit")
-        {
-            if (userInput == "loop")
-            {
-                doAutoloop = true;
-            }
-            else if(userInput.StartsWith("set"))
-            {
-                string[] fields = userInput.Split(" ");
-                if (fields[1] == "entity")
+            case "list":
+                int instructionStart = 0;
+                int instructionEnd = 0;
+                if (fields.Length == 3 && int.TryParse(fields[1], out instructionStart) && int.TryParse(fields[2], out instructionEnd))
                 {
-                    string actorName = fields[2];
-                    foreach(Entity eachEntity in Entity.GetEntityArray(memoryInterface))
+                    for(int i = instructionStart; i <= instructionEnd; i++)
                     {
-                        if(eachEntity.Actor.Name == actorName)
-                        {
-                            current.Entity = eachEntity;
-                            break;
-                        }
+                        ScriptInstruction currentInstruction = selectedScript.GetInstruction(i);
+                        Console.WriteLine("Instruction ID: {0:X}\tFunction ID: {1:X}\tParameter: {2:D}", i, currentInstruction.FunctionID, currentInstruction.Parameter);
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Unrecognized command");
+                    Console.WriteLine("Format: list <instructionStart> <instructionEnd>");
                 }
-            }
-            else
-            {
-                Console.WriteLine("Input a number only.");
-            }
+                break;
+            default:
+                Console.WriteLine("Unrecognized command.");
+                break;
         }
     }
+    else
+    {
+        selectedScript = loadedScripts[Math.Clamp(selectionIndex, 0, loadedScripts.Length - 1)];
+        string entityName = "None";
+        if (selectedScript.Entity.EntityPtr != 0)
+        {
+            entityName = selectedScript.Entity.Actor.Name;
+        }
+        ScriptInstruction currentInstruction = selectedScript.CurrentInstruction;
+        Console.WriteLine("Script ID: {0:D}\nEntity: {1}\nScript ID Code: {2:X}\nCurrent Instruction: {3:X}\nCurrent Function: {4:X}\nCurrent Parameter: {5:D}\n", selectionIndex, entityName, selectedScript.ScriptIDCode, selectedScript.CurrentInstructionID, currentInstruction.FunctionID, currentInstruction.Parameter);
+    }
 }
+while (userInput != "exit");
 
 memoryInterface.Close();

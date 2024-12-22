@@ -74,7 +74,7 @@
             WriteInt((int)scriptEvent, value);
         }
 
-        public int CurrentInstruction
+        public int CurrentInstructionID
         {
             get
             {
@@ -83,6 +83,14 @@
             set
             {
                 WriteInt(0x190, value);
+            }
+        }
+
+        public ScriptInstruction CurrentInstruction
+        {
+            get
+            {
+                return GetInstruction(CurrentInstructionID);
             }
         }
 
