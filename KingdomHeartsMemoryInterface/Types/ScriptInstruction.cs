@@ -3,7 +3,9 @@
     public enum ScriptFunction
     {
         Jump = 0x02,
-        Return = 0x05
+        Popjz = 0x03, // pop and jump if the value at the top of the stack is zero
+        Return = 0x05,
+        Push = 0x09
     }
     public class ScriptInstruction : KHMIDataType
     {
@@ -45,20 +47,23 @@
         {
             get
             {
-                int val = (((ReadByte(0x2) << 8) | ReadByte(0x1)) << 8) | ReadByte(0x0);
-                if(val > 0x7FFFFF)
+                int value = ReadInt(0x0) & 0x00FFFFFF;
+                if (value >= 0x800000)
                 {
-                    val -= 0x1000000;
+                    value -= 0x1000000;
                 }
-                return val;
+                return value;
             }
             set
             {
-                // todo fix later to work w/ 3byte int
-                byte[] bytes = BitConverter.GetBytes(value);
-                WriteByte(0x0, bytes[0]);
-                WriteByte(0x01, bytes[1]);
-                WriteByte(0x02, bytes[2]);
+                int pendingValue = value;
+                if(pendingValue < 0)
+                {
+                    pendingValue += 0x1000000;
+                }
+                byte preservedData = FunctionID;
+                WriteInt(0x0, pendingValue & 0x00FFFFFF);
+                FunctionID = preservedData;
             }
         }
     }

@@ -64,6 +64,40 @@
             }
         }
 
+        public int StackPointer
+        {
+            get
+            {
+                return ReadInt(0x194);
+            }
+            set
+            {
+                WriteInt(0x194, value);
+            }
+        }
+
+        public int GetValueOnStack(int index)
+        {
+            return ReadInt(0x198 + (index * 4));
+        }
+
+        public void SetValueOnStack(int index, int value)
+        {
+            WriteInt(0x198 + (index * 4), value);
+        }
+
+        public int StackSelection
+        {
+            get
+            {
+                return GetValueOnStack(StackPointer);
+            }
+            set
+            {
+                SetValueOnStack(StackPointer, value);
+            }
+        }
+
         public int GetEventInstruction(ScriptEvent scriptEvent)
         {
             return ReadInt((int)scriptEvent);
