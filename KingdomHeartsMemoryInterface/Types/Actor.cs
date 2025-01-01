@@ -33,6 +33,15 @@ namespace KingdomHeartsMemoryInterface.Types
             }
         }
 
+        public Mobj Mobj
+        {
+            get
+            {
+                IntPtr mobjAddress = new ShortPointer(MemoryInterface, ReadInt(0x8)).LongValue;
+                return new Mobj(MemoryInterface, mobjAddress);
+            }
+        }
+
         public string MDLS
         {
             get
