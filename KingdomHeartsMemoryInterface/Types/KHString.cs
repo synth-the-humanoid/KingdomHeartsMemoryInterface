@@ -9,6 +9,7 @@
             {
                 SetupCipher();
             }
+            Size = Bytes.Length;
         }
 
         private static void SetupCipher()
@@ -56,6 +57,10 @@
         {
             List<byte> bytes = new List<byte>();
             Dictionary<string, byte> flipped = new Dictionary<string, byte>();
+            foreach(byte eachKey in cipher.Keys)
+            {
+                flipped[cipher[eachKey]] = eachKey;
+            }
             foreach (char eachChar in data.ToCharArray())
             {
                 string current = string.Format("{0}", eachChar);
@@ -64,10 +69,23 @@
                     bytes.Add(flipped[current]);
                 }
             }
+            bytes.Add(0);
             return bytes.ToArray();
         }
 
         public string String
+        {
+            get
+            {
+                return ConvertBytesToString(Bytes);
+            }
+            set
+            {
+                Bytes = ConvertStringToBytes(value);
+            }
+        }
+
+        public byte[] Bytes
         {
             get
             {
@@ -79,12 +97,20 @@
                     currentByte = ReadByte(i++);
                     bytes.Add(currentByte);
                 }
-                while (currentByte != 0x0);
-                return ConvertBytesToString(bytes.ToArray());
+                while(currentByte != 0x0 && currentByte != 0x4);
+                return bytes.ToArray();
             }
             set
             {
-                WriteBytes(0x0, ConvertStringToBytes(value));
+                WriteBytes(0x0, value);
+            }
+        }
+
+        public KHString NextString
+        {
+            get
+            {
+                return new KHString(MemoryInterface, NextAddress);
             }
         }
     }

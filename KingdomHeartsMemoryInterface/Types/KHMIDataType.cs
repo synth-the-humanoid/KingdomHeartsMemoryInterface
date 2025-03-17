@@ -216,6 +216,18 @@ namespace KingdomHeartsMemoryInterface.Types
             {
                 return structSize;
             }
+            set
+            {
+                structSize = value;
+            }
+        }
+
+        protected IntPtr NextAddress
+        {
+            get
+            {
+                return address + structSize;
+            }
         }
     }
 }

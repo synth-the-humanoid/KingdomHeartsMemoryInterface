@@ -6,3 +6,6 @@ ScriptArrayBase,2398DA0
 ScriptArrayCount,238D7FC
 ItemArrayBasePtr,2D23738
 ActionArrayBase,2D23998
+ItemShopStringBlock,5019B0
+GummiTextBoxBase,5051B0
+TextBoxBase,5019B0

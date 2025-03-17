@@ -29,6 +29,20 @@ namespace KingdomHeartsMemoryInterface.Types
 
         public Item(MemoryInterface.MemoryInterface memoryInterface, IntPtr address) : base(memoryInterface, address, 0x14) { }
 
+        public byte ItemID
+        {
+            get
+            {
+                IntPtr baseAddressPtr = MemoryInterface.BaseAddress + OffsetHandler.GetOffset("ItemArrayBasePtr");
+                long baseAddress = 0;
+                if(MemoryInterface.ReadLong(baseAddressPtr, ref baseAddress))
+                {
+                    return (byte)((Address - baseAddress) / 0x14);
+                }
+                return 0;
+            }
+        }
+
         public Action Action
         {
             get
@@ -43,6 +57,16 @@ namespace KingdomHeartsMemoryInterface.Types
             {
                 IntPtr descAddress = new ShortPointer(MemoryInterface, ReadInt(0x0C)).LongValue;
                 return new KHString(MemoryInterface, descAddress);
+            }
+        }
+
+        public KHString ShopDescription
+        {
+            get
+            {
+                IntPtr blockAddress = MemoryInterface.BaseAddress + OffsetHandler.GetOffset("ItemShopStringBlock");
+                KHStringBlock shopBlock = new KHStringBlock(MemoryInterface, blockAddress);
+                return shopBlock.GetStringAtIndex(ItemID);
             }
         }
     }
